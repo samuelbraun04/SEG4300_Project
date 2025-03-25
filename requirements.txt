@@ -1,0 +1,11 @@
+google_api_python_client
+google_auth_oauthlib
+Google_Images_Search
+moviepy
+openai
+Pillow
+protobuf
+pydub
+pytesseract
+windows-curses
+google_images_search
