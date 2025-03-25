@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#THIS ENTIRE FILE SOLELY EXISTS BECAUSE THE NEW PUSHOVER UPDATE IS BROKEN FOR MY VERSION OF THE iOS APP, SO I JUST HAVE A LOCAL VERSION I CAN USE HERE
 
 from http.client import HTTPSConnection
 from urllib.parse import urlencode

@@ -29,15 +29,8 @@ try:
         channel_name = sys.argv[1]
     else:
         channel_name = "History's Darkest Questions"
-        
-
-    # print(len(os.environ.get("OPENAI_KEY")))
 
     openai.api_key = os.environ.get("OPENAI_KEY")
-    # client = openai.Client(os.environ.get("OPENAI_KEY"))
-    # images_keys = (open(os.getcwd()+'\\googleimages_key.txt').readlines())
-    # image_engine = GoogleImagesSearch(os.environ.get("IMAGES_KEY_API_KEY"), os.environ.get("IMAGES_KEY_SEARCH_ID"))
-
     
     notification = Pushover('adiwj3152youpxzkvg1h2r7df6tts8')
     notification.user('u5rjk8yhveh6uyeb8uz8u9s8zrrut2')
@@ -90,11 +83,11 @@ try:
             print(f'Failed to delete {file_path}. Reason: {e}')
 
     if test_mode == False:
-        # Check if the directory exists
+        
         if not os.path.exists(directory_path):
             print(f"Directory not found: {directory_path}")
         else:
-            # Iterate through files in the directory
+            
             for filename in os.listdir(directory_path):
                 if filename.endswith('.mp4'):
                     file_path = os.path.join(directory_path, filename)
@@ -271,16 +264,16 @@ try:
     print(str(title_time_stamps))
     concatenated_audio.export(os.path.join(audio_directory, 'script.flac'), format="flac", bitrate="192k")
 
-    # Transcribe the audio file using Whisper
+    #transcribe the audio file using Whisper
     with open(os.path.join(audio_directory, 'script.flac'), "rb") as f:
         response = openai.audio.transcriptions.create(model="whisper-1", file=f, response_format='srt')
         open(os.path.join(audio_directory, 'subtitles.srt'), "w", encoding='utf-8').write(response)
 
-    #add empty subtitle line at the end because of moviepy bug THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN THIS IS BROKEN 
+    #add empty subtitle line at the end because of moviepy bug 
     with open(os.path.join(audio_directory, 'subtitles.srt'), 'r+', encoding='utf-8') as file:
         lines = file.readlines()
 
-        # Find the last subtitle number and time
+        #find the last subtitle number and time
         last_number = 0
         last_time = None
         for line in lines[::-1]:
@@ -291,12 +284,11 @@ try:
                 break
 
         if last_number and last_time:
-            # Calculate new times
+            #Calculate new times
             hours, minutes, seconds = map(int, last_time.split(',')[0].split(':'))
             milliseconds = int(last_time.split(',')[1])
             milliseconds += 500  # Increase by 500 milliseconds
 
-            # Adjust for overflow in milliseconds, seconds, and minutes
             if milliseconds >= 1000:
                 milliseconds -= 1000
                 seconds += 1
@@ -307,15 +299,15 @@ try:
                 minutes -= 60
                 hours += 1
 
-            # Format the new times
+            
             new_start_time = f"{hours:02}:{minutes:02}:{seconds:02},{milliseconds:03}"
             new_end_time = f"{hours:02}:{minutes:02}:{seconds:02},{milliseconds + 500:03}"
             
-            # Define the new subtitle entry
+            
             new_subtitle_number = last_number + 1
             new_subtitle_entry = f"\n{new_subtitle_number}\n{new_start_time} --> {new_end_time}\nEnd\n\n"
 
-            # Append the new subtitle
+            
             file.write(new_subtitle_entry)
 
     #scrape the images from the web
@@ -421,7 +413,7 @@ try:
 
     #overlay music
     flac_file = AudioSegment.from_file(os.path.join(audio_directory, 'script.flac'))
-    # music_file = AudioSegment.from_file(os.path.join(music_directory, random.choice(os.listdir(music_directory))))
+    # music_file = AudioSegment.from_file(os.path.join(music_directory, random.choice(os.listdir(music_directory)))) #for this iteration of the project, music is distracting
     # music_file -= 11
     # result = flac_file.overlay(music_file, loop=True)
     # result.export(os.path.join(audio_directory, 'script.flac'), format="flac")
@@ -440,20 +432,10 @@ try:
 
     video_duration = audio_clip.duration
 
-    # #if video too short
-    # if video_duration < 480:
-    #     print("Video not long enough. Adding "+str(ceil(480-video_duration)+2)+' seconds.')
-    #     ending = TextClip("Thanks for watching!\n\nDon't forget to like, comment, and subscribe.", size=(1920,1080), font_size=70, bg_color='black', color='white')
-    #     ending = ending.with_audio(AudioFileClip(os.path.join(directory_path, 'outro.mp3')))
-    #     ending = ending.with_duration(ceil(480-video_duration)+2)
-    #     clips.append(ending)
-
     concat_clip = concatenate_videoclips(clips, method="compose")
     concat_clip = concat_clip.with_audio(audio_clip)
     concat_clip = concat_clip.with_duration(audio_clip.duration)
     concat_clip = concat_clip.with_fps(30)
-
-    # random_font = random.choice(['Georgia-Regular', 'Times-New-Roman', 'Rockwell', 'Sylfaen', 'Arial'])
 
     generator = lambda text: TextClip(os.path.join(directory_path, "arial.ttf"), text=text, font_size=32, color='white')
     subtitle_clip = SubtitlesClip(os.path.join(audio_directory, 'subtitles.srt'), make_textclip=generator, encoding='utf-8')
@@ -479,6 +461,10 @@ try:
     final.write_videofile(output_path, codec="libx264")
     final_video = VideoFileClip(output_path)
 
+    #########################################################################################################
+    #### ALL CODE AFTER THIS COMMENT IS SOLELY TO GENERATE A THUMBNAIL AND UPLOAD TO YOUTUBE VIA API#########
+    #########################################################################################################
+
     if test_mode == False:
 
         #get video ready
@@ -490,14 +476,6 @@ try:
         print("Getting current working directory...")
         current_working_directory = os.getcwd()
         print(f"Current working directory: {current_working_directory}")
-
-        # print("Listing subdirectories excluding .git and __pycache__...")
-        # subdirectories = [name for name in os.listdir(current_working_directory) 
-        #                   if os.path.isdir(os.path.join(current_working_directory, name)) 
-        #                   and (name != '.git') and (name != '__pycache__') and (name != '.vscode')]
-        # print("List of subdirectories:", subdirectories)
-
-        # for directory in subdirectories:
 
         full_directory = directory_path
         directory = channel_name
@@ -645,8 +623,6 @@ try:
         topics = open(os.path.join(os.getcwd(), directory, 'topics.txt'), 'r').readlines()
 
         send_notification(notification, 'VIDEO UPLOADED: '+channel_name, title+'. Number of topics left: '+str(len(topics)))
-
-        open(r"C:\Users\samlb\Documents\Projects\main_log.txt", 'a+', encoding='utf-8').write(str(datetime.now())+'\n'+str(locals())+'\n\n\n\n')
 
 except Exception as e:
     if test_mode == False:
