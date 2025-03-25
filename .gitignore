@@ -5,3 +5,4 @@
 /venv
 .env
 master_file.txt
+*.pkl
